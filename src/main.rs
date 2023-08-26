@@ -20,12 +20,13 @@ async fn main() {
         let (stream, _) = listener.accept().await.unwrap();
        tokio::spawn(async move {
         if let Err(e) = process(stream).await {
+                
                 println!("failed to process connection; error = {}", e);
             }
         });
     
 }
-
+}
 
 async fn process(stream: TcpStream) -> Result<(), Box<dyn Error>> {
     let mut transport = Framed::new(stream, Http);
@@ -45,9 +46,8 @@ async fn process(stream: TcpStream) -> Result<(), Box<dyn Error>> {
 
 async fn respond(req: Request<()>) -> Result<Response<Vec<u8>>, Box<dyn Error>> {
     let mut response = Response::builder();
-    let mut file = File::open("G:\\web\\radio-server-rust\\a.mp3").await?;
+    let mut file = File::open("G:\\web\\myradio-server-rs\\a.mp3").await?;
     let mut contents = vec![];
-    ;
     file.read_to_end(&mut contents).await.unwrap();
     let response:Response<Vec<u8>> = response.status(200).header("Connection", "close").header("Content-Type", "audio/mpeg")
         .body(contents)
@@ -83,7 +83,7 @@ impl Encoder<Response<Vec<u8>>> for Http {
         }
 
         dst.extend_from_slice(b"\r\n");
-        dst.extend_from_slice(&item.body()[..]);
+        dst.extend_from_slice(&item.body());
 
         return Ok(());
 
@@ -177,4 +177,4 @@ impl Decoder for Http {
             .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
         Ok(Some(req))
     }
-}}
+}
